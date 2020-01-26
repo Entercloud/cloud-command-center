@@ -4,8 +4,20 @@
 
 ## Getting Started
 
+
+
+## Project Structure
+
+/source/ccli
+├── VERSION
+├── ccli
+├── commands
+│   └── deploy
+├── common
+└── config.template
+
 To begin using this template, choose one of the following options to get started:
-* [Download the latest release on entercloud.info/builds](http://entercloud.info:8080)
+~~ [Download the latest release on entercloud.info/builds](http://entercloud.info:8080) ~~    **jenkins server has been removed
 * Clone the repo: `git clone https://github.com/entercloud/cloud-command-center.git`
 * Fork the repo
 
@@ -23,4 +35,4 @@ Cloud command center was created by and is maintained by **[Andrew S Thompson](h
 
 ## Copyright
 
-Copyright 2017 Entercloud LLC.
+Copyright 2020 Entercloud LLC.
