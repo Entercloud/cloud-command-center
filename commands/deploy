@@ -1,0 +1,30 @@
+
+#!/usr/bin/env bash
+set -e
+. "$CCLI_WORKDIR/common"
+
+cli_help_deploy() {
+  echo "
+Command: deploy
+Usage: 
+  deploy project_name"
+  exit 1
+}
+
+[ ! -n "$1" ] && cli_help_deploy
+
+export CCLI_PROJECT_NAME=$1
+
+cli_log "Deployment INIT"
+
+cli_log "ENV variables"
+env | grep "CCLI_*"
+
+cli_log "Executing helm upgrade --install ..."
+# Example
+# helm upgrade --install \
+#   --wait \
+#   --values $CCLI_PROJECTS_PATH/$CCLI_PROJECT_NAME/values.yaml \
+#   --namespace $CCLI_K8S_NAMESPACE $CCLI_PROJECT_NAME $CCLI_REPO_PATH
+
+cli_log "Deployment END"

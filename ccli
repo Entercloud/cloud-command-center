@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -e
+export CCLI_WORKDIR=$(cd $(dirname $0) && pwd)
+. "$CCLI_WORKDIR/ccli"
+
+cli_help() {
+  cli_name=${0##*/}
+  echo "
+$cli_name
+Cloud Command Center CLI
+Version: $(cat $CCLI_WORKDIR/VERSION)
+Usage: $cli_name [command]
+Commands:
+  deploy    Deploy
+  *         Help
+"
+  exit 1
+}
+
+cli_log "Exporting config ..."
+export $(cat "$CCLI_WORKDIR/config" | xargs)
+
+case "$1" in
+  deploy|d)
+    "$CCLI_WORKDIR/commands/deploy" "$2" | tee -ia "$CCLI_WORKDIR/deploy_${2}.log"
+    ;;
+  *)
+    cli_help
+    ;;
+esac
