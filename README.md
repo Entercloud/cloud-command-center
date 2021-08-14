@@ -15,7 +15,7 @@ Have a bug or an issue with this template? [Open a new issue](https://github.com
 
 ## Creator
 
-Cloud command center was created by and is maintained by **[Andrew S Thompson](http://facebook.com/mrinternet305)**, Owner of [Entercloud LLC](http://entercloud.info).
+Cloud command center was created by and is maintained by **[Andrew S Thompson](https://www.linkedin.com/in/cloudchief/)**, Owner of [Entercloud LLC](http://entercloud.info).
 
 * https://twitter.com/andrewpsp
 * https://github.com/andrewpsp
