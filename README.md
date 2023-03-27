@@ -22,5 +22,6 @@ Cloud command center was created by and is maintained by **[Andrew S Thompson](h
 
 
 ## Copyright
-
+```
 Copyright 2017 Entercloud LLC.
+```
