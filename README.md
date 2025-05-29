@@ -1,16 +1,17 @@
-# [Cloud Command Center](http://entercloud.info) - [project pages](http://github.com/entercloud)
+# [Cloud Command Center](http://entercloud.org) - [project pages](http://github.com/entercloud)
 
-[Cloud command center](http://entercloud.info) is a multipurpose tool kit for [Entercloud platform](http://entercloud.info/) created by [entercloud](http://entercloud.info).
+[Cloud command center](http://entercloud.org) is a multipurpose tool kit for [Entercloud platform](http://entercloud.org/) created by [entercloud](http://entercloud.org).
 
 ## Getting Started
 
 To begin using this template, choose one of the following options to get started:
-* [Download the latest release on entercloud.info/builds](http://entercloud.info:8080)
+* [Download the latest release on entercloud.org/builds](http://entercloud.org)
 * Clone the repo: `git clone https://github.com/entercloud/cloud-command-center.git`
 * Fork the repo
 
 
 ## Roadmap v1 
+![Roadmap v1](https://github.com/Entercloud/cloud-command-center/blob/2b66a17e27defaa84c741e58ebd1a4ecccf73f84/CCC-Roadmap-v1.png)
 
 * Unified Access Control:
  OAuth/OIDC secures all business unit applications through a single gateway.
@@ -35,5 +36,5 @@ Cloud command center was created by and is maintained by **[Andrew S Thompson](h
 
 ## Copyright
 ```
-Copyright 2017 Entercloud LLC.
+Copyright 2025 Entercloud LLC.
 ```
