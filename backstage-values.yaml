@@ -1,0 +1,18 @@
+```yaml
+# backstage-values.yaml
+appConfig:
+  app:
+    baseUrl: https://build.entercloud.org
+  backend:
+    baseUrl: https://build.entercloud.org
+    cors:
+      origin: https://build.entercloud.org
+
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: ${aws_acm_certificate.backstage.arn}
+```
