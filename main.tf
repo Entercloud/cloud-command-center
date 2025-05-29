@@ -1,6 +1,6 @@
 # main.tf
 provider "aws" {
-  region = "us-west-2"
+  region = "us-east-1"
 }
 
 provider "kubernetes" {
@@ -12,6 +12,177 @@ provider "kubernetes" {
     args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
   }
 }
+
+# OIDC Provider for GitHub Actions
+resource "aws_iam_openid_connect_provider" "github_actions" {
+  url = "https://token.actions.githubusercontent.com"
+
+  client_id_list = [
+    "sts.amazonaws.com"  # OIDC token audience
+  ]
+
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1"  # GitHub's OIDC thumbprint
+  ]
+}
+# IAM Role for GitHub Actions
+resource "aws_iam_role" "github_actions_role" {
+  name = "GitHubActionsOIDCRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.github_actions.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringLike = {
+            # Restrict to your GitHub org/repo
+            "token.actions.githubusercontent.com:sub" = "repo:Entercloud/cloud-command-center:*"
+          }
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# exhaustive permissions  list(attach required policies)
+# Enhanced IAM Role for GitHub Actions with Route53, ALB, and EKS permissions
+resource "aws_iam_role" "github_actions_role" {
+  name = "GitHubActionsOIDCRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.github_actions.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringLike = {
+            "token.actions.githubusercontent.com:sub" = [
+              "repo:Entercloud/cloud-command-center:refs/heads/main",
+              "repo:Entercloud/cloud-command-center:pull_request"
+            ]
+          }
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# Custom policy combining all required permissions
+resource "aws_iam_policy" "backstage_deployment_policy" {
+  name        = "BackstageDeploymentPolicy"
+  description = "Permissions for Backstage deployment via GitHub Actions"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      # Route53 DNS Management
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:ChangeResourceRecordSets",
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets"
+        ]
+        Resource = "arn:aws:route53:::hostedzone/Z03129551DARX4AJLUMHO"
+      },
+      
+      # ALB Controller Permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:DescribeSecurityGroups",
+          "elasticloadbalancing:DescribeLoadBalancers",
+          "elasticloadbalancing:DescribeTargetGroups"
+        ]
+        Resource = "*"
+      },
+      
+      # EKS Cluster Access
+      {
+        Effect = "Allow"
+        Action = [
+          "eks:DescribeCluster",
+          "eks:ListClusters"
+        ]
+        Resource = module.eks.cluster_arn
+      },
+      
+      # ACM Certificate Management
+      {
+        Effect = "Allow"
+        Action = [
+          "acm:DescribeCertificate",
+          "acm:ListCertificates"
+        ]
+        Resource = aws_acm_certificate.backstage.arn
+      },
+      
+      # ECR Access for Container Images
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:GetRepositoryPolicy",
+          "ecr:DescribeRepositories",
+          "ecr:ListImages",
+          "ecr:DescribeImages",
+          "ecr:BatchGetImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:PutImage"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# Attach the custom policy
+resource "aws_iam_role_policy_attachment" "backstage_deployment" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = aws_iam_policy.backstage_deployment_policy.arn
+}
+
+# Additional required policies
+resource "aws_iam_role_policy_attachment" "eks_admin" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "alb_controller" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
+}
+resource "aws_iam_role_policy_attachment" "ecr_access" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_access" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
